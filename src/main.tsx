@@ -47,25 +47,8 @@ Devvit.addSchedulerJob({
   },
 });
 
-Devvit.addTrigger({
-  event: "AppInstall",
-  onEvent: async (_, context) => {
-    try {
-      const jobId = await context.scheduler.runJob({
-        cron: "0 12 * * *", // Run daily at 12:00 UTC
-        name: "daily_game",
-        data: {},
-      });
-      await context.redis.set("jobId", jobId);
-    } catch (e) {
-      console.log("error was not able to schedule:", e);
-      throw e;
-    }
-  },
-});
-
 Devvit.addMenuItem({
-  label: "Start Diving!",
+  label: "Start Single Game",
   location: "subreddit",
   forUserType: "moderator",
   onPress: async (_event, context) => {
@@ -81,6 +64,33 @@ Devvit.addMenuItem({
       ),
     });
     ui.showToast({ text: "Game created!" });
+  },
+});
+
+Devvit.addMenuItem({
+  label: "Start Scheduled Game (Daily)",
+  location: "post",
+  onPress: async (event, context) => {
+    try {
+      const jobId = await context.scheduler.runJob({
+        cron: "0 12 * * *", // Run daily at 12:00 UTC
+        name: "daily_game",
+      });
+      await context.redis.set("jobId", jobId);
+    } catch (e) {
+      console.log("error was not able to schedule:", e);
+      throw e;
+    }
+  },
+});
+
+Devvit.addMenuItem({
+  label: "Stop Scheduled Game (Daily)",
+  location: "post",
+  forUserType: "moderator",
+  onPress: async (_, context) => {
+    const jobId = (await context.redis.get("jobId")) || "0";
+    await context.scheduler.cancelJob(jobId);
   },
 });
 
