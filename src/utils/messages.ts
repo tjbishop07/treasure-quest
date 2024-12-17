@@ -9,8 +9,5 @@ export const diveErrorMessage: string =
 export const tileSelectionErrorMessage: string =
   "You can't explore land! Please select a blue water tile.";
 
-export const diveStatusMessage = (depth: number): string =>
-  `Diving... depth is: ${depth} meters.`;
-
 export const tileExploredMessage = (hasTreasure: number): string =>
   `You've already explored this tile. Found ${hasTreasure} gold coins.`;

@@ -18,7 +18,6 @@ import {
 } from "./utils/board.js";
 import {
   diveErrorMessage,
-  diveStatusMessage,
   startupMessage,
   tileSelectionErrorMessage,
   tileExploredMessage,
