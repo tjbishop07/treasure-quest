@@ -1,5 +1,3 @@
-import { Coordinate } from "./types.js";
-
 export const startupMessage: string =
   "Select a blue water tile to start exploring! Try to find all the hidden treasure before you air runs out!";
 

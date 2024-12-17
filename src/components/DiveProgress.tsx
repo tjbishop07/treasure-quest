@@ -1,5 +1,4 @@
 import { Devvit } from "@devvit/public-api";
-import { SystemMessage, SystemMessageType } from "../utils/types.js";
 
 type DiveProgressProps = {
   progress: number;

@@ -1,5 +1,4 @@
 import { Devvit, useState, useInterval } from "@devvit/public-api";
-import { Columns } from "@devvit/kit";
 import {
   Tile,
   Row,
@@ -24,6 +23,8 @@ import {
 } from "./utils/messages.js";
 import { Modal } from "./components/Modal.js";
 import { DiveProgress } from "./components/DiveProgress.js";
+import { Compass } from "./components/Compass.js";
+import { Header } from "./components/Header.js";
 
 Devvit.configure({
   redditAPI: true,
@@ -198,7 +199,7 @@ const App: Devvit.CustomPostComponent = (context) => {
     diveInterval.start();
   };
 
-  const _renderCoins = (): JSX.Element => {
+  const _renderTreasureBoxes = (): JSX.Element => {
     const notFoundTreasureCount =
       getTreasureCount(gameBoard) - gameBoard.foundTreasureCount;
     const foundCoins = [];
@@ -257,46 +258,8 @@ const App: Devvit.CustomPostComponent = (context) => {
               width="100%"
               gap="small"
             >
-              <Columns columnCount={2} order="row">
-                <hstack alignment="middle start">
-                  <vstack alignment="middle start">
-                    <text
-                      style="heading"
-                      size="xlarge"
-                      weight="bold"
-                      outline="thin"
-                    >
-                      {gameBoard.airSupply}m
-                    </text>
-                    <text
-                      size="medium"
-                      weight="bold"
-                      color="rgba(255, 255, 255, 0.5)"
-                    >
-                      Air Left
-                    </text>
-                  </vstack>
-                </hstack>
-                <hstack alignment="middle end">
-                  <vstack alignment="middle end">
-                    <text
-                      style="heading"
-                      size="xlarge"
-                      weight="bold"
-                      outline="thin"
-                    >
-                      {gameBoard.foundTreasureValue}
-                    </text>
-                    <text
-                      size="medium"
-                      weight="bold"
-                      color="rgba(255, 255, 255, 0.5)"
-                    >
-                      Coins Found
-                    </text>
-                  </vstack>
-                </hstack>
-              </Columns>
+              <Header gameBoard={gameBoard} />
+
               <vstack>
                 {gameBoard.rows.map((row: Row) => {
                   const tiles: Tile[] = row.tiles;
@@ -340,7 +303,7 @@ const App: Devvit.CustomPostComponent = (context) => {
                 })}
                 <spacer size="medium" />
                 <hstack gap="small" alignment="center middle" grow>
-                  {_renderCoins()}
+                  {_renderTreasureBoxes()}
                 </hstack>
                 <spacer size="medium" />
                 <button
@@ -362,16 +325,7 @@ const App: Devvit.CustomPostComponent = (context) => {
         </vstack>
       )}
 
-      <hstack cornerRadius="full" padding="small" backgroundColor="#131f23">
-        <image
-          url="compass.png"
-          imageWidth="70px"
-          imageHeight="70px"
-          width="70px"
-          height="70px"
-          description="compass"
-        />
-      </hstack>
+      <Compass />
 
       {systemMessage &&
         Modal({
