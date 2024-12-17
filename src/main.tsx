@@ -25,6 +25,7 @@ import { Modal } from "./components/Modal.js";
 import { DiveProgress } from "./components/DiveProgress.js";
 import { Compass } from "./components/Compass.js";
 import { Header } from "./components/Header.js";
+import { GameOver } from "./components/GameOver.js";
 
 Devvit.configure({
   redditAPI: true,
@@ -147,31 +148,15 @@ const App: Devvit.CustomPostComponent = (context) => {
     updateGameBoard.airSupply -= selectedTile!.depth;
     updateGameBoard.gameStarted = true;
 
-    await saveGameboard(
-      context.redis,
-      context.postId!,
-      currentUserName!,
-      updateGameBoard
-    );
-
-    setGameBoard(updateGameBoard);
-
     if (updateGameBoard.airSupply <= 0) {
-      setSystemMessage({
-        message: `OH NO! You ran out of air! Total value of your findings: $${updateGameBoard.foundTreasureValue}`,
-        type: SystemMessageType.Error,
-        dismissable: false,
-      });
+      updateGameBoard.gameOverMessage = `OH NO! You ran out of air!`;
+      updateGameBoard.gameOver = true;
     } else {
       if (
         updateGameBoard.foundTreasureCount === getTreasureCount(updateGameBoard)
       ) {
-        // TODO: Calc a total score with coins found plus air left bonus
-        setSystemMessage({
-          message: `YOU FOUND ALL THE TREASURE! Total value of your findings: $${updateGameBoard.foundTreasureValue}`,
-          type: SystemMessageType.Info,
-          dismissable: false,
-        });
+        updateGameBoard.gameOverMessage = `You found all the treasure!`;
+        updateGameBoard.gameOver = true;
       } else {
         const treasureValue = selectedTile?.treasureValue || 0;
         setSystemMessage({
@@ -183,6 +168,15 @@ const App: Devvit.CustomPostComponent = (context) => {
         });
       }
     }
+
+    await saveGameboard(
+      context.redis,
+      context.postId!,
+      currentUserName!,
+      updateGameBoard
+    );
+
+    setGameBoard(updateGameBoard);
   };
 
   const _dive = async (): Promise<void> => {
@@ -339,6 +333,10 @@ const App: Devvit.CustomPostComponent = (context) => {
           totalDepth={selectedTile!.depth}
           onPress={() => {}}
         />
+      )}
+
+      {gameBoard.gameOver && (
+        <GameOver gameboard={gameBoard} />
       )}
     </zstack>
   );

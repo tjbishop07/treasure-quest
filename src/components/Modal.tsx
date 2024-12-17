@@ -21,7 +21,7 @@ export const Modal = (props: ModalProps) => {
               url={props.systemMessage.image}
               imageWidth={250}
               imageHeight={250}
-              description="game background"
+              description="model image"
             />
             <spacer size="medium" />
           </>

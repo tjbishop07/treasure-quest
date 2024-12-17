@@ -20,6 +20,7 @@ export type GameBoard = {
   airSupply: number;
   gameStarted: boolean;
   gameOver: boolean;
+  gameOverMessage?: string;
 };
 
 export enum TileType {
