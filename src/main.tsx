@@ -40,9 +40,13 @@ Devvit.addSchedulerJob({
     const gameNumber = await context.redis.incrBy("game_number", 1);
 
     const resp = await context.reddit.submitPost({
-      subredditName: subreddit.name,
       title: `Daily Treasure Quest Game #${gameNumber}`,
-      text: "We've found more hidden treasure! Dive in and find it!",
+      subredditName: subreddit.name,
+      preview: (
+        <vstack height="100%" width="100%" alignment="middle center">
+          <text size="large">Loading ...</text>
+        </vstack>
+      ),
     });
     console.log("posted resp", JSON.stringify(resp));
   },
@@ -55,9 +59,8 @@ Devvit.addTrigger({
       const jobId = await context.scheduler.runJob({
         cron: "0 12 * * *", // Run daily at 12:00 UTC
         name: "daily_game",
-        data: {},
       });
-      await context.redis.set("jobId", jobId);
+      await context.redis.set("dailyGameJobId", jobId);
     } catch (e) {
       console.log("error was not able to schedule:", e);
       throw e;
@@ -335,9 +338,7 @@ const App: Devvit.CustomPostComponent = (context) => {
         />
       )}
 
-      {gameBoard.gameOver && (
-        <GameOver gameboard={gameBoard} />
-      )}
+      {gameBoard.gameOver && <GameOver gameboard={gameBoard} />}
     </zstack>
   );
 };
