@@ -29,7 +29,6 @@ import { GameOver } from "./components/GameOver.js";
 
 Devvit.configure({
   redditAPI: true,
-  redis: true,
   media: true,
 });
 
@@ -37,7 +36,14 @@ Devvit.addSchedulerJob({
   name: "daily_game",
   onRun: async (_, context) => {
     const subreddit = await context.reddit.getCurrentSubreddit();
-    const gameNumber = await context.redis.incrBy("game_number", 1);
+    var gameNumber = await context.redis.get("game_number");
+
+    if (!gameNumber) {
+      console.log("No game number found, starting at 0");
+      await context.redis.set("game_number", "0");
+    }
+
+    gameNumber = (await context.redis.incrBy("game_number", 1)).toString();
 
     const resp = await context.reddit.submitPost({
       title: `Daily Treasure Quest Game #${gameNumber}`,
@@ -55,6 +61,7 @@ Devvit.addSchedulerJob({
 Devvit.addTrigger({
   event: "AppInstall",
   onEvent: async (_, context) => {
+    console.log("App install triggers. Setting up schedule game");
     try {
       const jobId = await context.scheduler.runJob({
         cron: "0 12 * * *", // Run daily at 12:00 UTC

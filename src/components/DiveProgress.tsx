@@ -36,7 +36,7 @@ export const DiveProgress = (props: DiveProgressProps) => {
         <spacer size="medium" />
 
         <vstack backgroundColor="#FFD5C6" cornerRadius="full" width="100%">
-          <hstack backgroundColor="global-coins" width={`${currentProgress}%`}>
+          <hstack backgroundColor="red" width={`${currentProgress}%`}>
             <spacer size="small" shape="square" />
           </hstack>
         </vstack>
