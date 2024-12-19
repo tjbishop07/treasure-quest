@@ -58,25 +58,72 @@ Devvit.addSchedulerJob({
   },
 });
 
-Devvit.addTrigger({
-  event: "AppInstall",
-  onEvent: async (_, context) => {
-    console.log("App install triggers. Setting up schedule game");
+Devvit.addMenuItem({
+  label: "Reset Daily Game Number",
+  location: "subreddit",
+  forUserType: "moderator",
+  onPress: async (_event, context) => {
+    const { ui } = context;
+    console.log("Resetting game number...");
     try {
-      const jobId = await context.scheduler.runJob({
-        cron: "0 12 * * *", // Run daily at 12:00 UTC
-        name: "daily_game",
-      });
-      await context.redis.set("dailyGameJobId", jobId);
+      await context.redis.set("game_number", "0");
+      console.log("Game number reset to 0");
     } catch (e) {
-      console.log("error was not able to schedule:", e);
+      console.log("error resetting game number:", e);
       throw e;
     }
+    ui.showToast({ text: "Game number reset!" });
   },
 });
 
 Devvit.addMenuItem({
-  label: "Start Diving!",
+  label: "Cancel Daily Game",
+  location: "subreddit",
+  forUserType: "moderator",
+  onPress: async (_event, context) => {
+    const { ui } = context;
+    console.log("Canceling scheduled game...");
+    try {
+      const jobId = await context.redis.get("dailyGameJobId");
+      if (!jobId) {
+        console.log("No job found to cancel");
+        return;
+      }
+      await context.scheduler.cancelJob(jobId);
+      await context.redis.del("dailyGameJobId");
+      console.log("Job cancelled:", jobId);
+    } catch (e) {
+      console.log("error cancelling game schedule:", e);
+      throw e;
+    }
+    ui.showToast({ text: "Game scheduled cancelled!" });
+  },
+});
+
+Devvit.addMenuItem({
+  label: "Start Daily Game",
+  location: "subreddit",
+  forUserType: "moderator",
+  onPress: async (_event, context) => {
+    const { ui } = context;
+    console.log("Setting up schedule game...");
+    try {
+      const jobId = await context.scheduler.runJob({
+        cron: "0 12 * * *",
+        name: "daily_game",
+      });
+      await context.redis.set("dailyGameJobId", jobId);
+      console.log("Job scheduled:", jobId);
+    } catch (e) {
+      console.log("error scheduling game", e);
+      throw e;
+    }
+    ui.showToast({ text: "Game scheduled!" });
+  },
+});
+
+Devvit.addMenuItem({
+  label: "Start Diving",
   location: "subreddit",
   forUserType: "moderator",
   onPress: async (_event, context) => {
