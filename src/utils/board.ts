@@ -57,7 +57,7 @@ export const getTreasureCount = (gameBoard: GameBoard): number => {
   return treasureCount;
 };
 
-export const generateBoard = (): GameBoard => {
+export const generateBoard = (gameNumber: string): GameBoard => {
   const rowCount = 10;
   const rows = [];
   for (let i = 0; i < rowCount; i++) {
@@ -71,6 +71,7 @@ export const generateBoard = (): GameBoard => {
     airSupply: 1500,
     gameStarted: false,
     gameOver: false,
+    gameNumber: gameNumber,
   };
 };
 

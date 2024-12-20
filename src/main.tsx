@@ -8,7 +8,11 @@ import {
   SystemMessage,
   SystemMessageType,
 } from "./utils/types.js";
-import { loadGameboard, saveGameboard } from "./api/api.js";
+import {
+  generateDailyGameboard,
+  loadPlayerGameboard,
+  saveGameboard,
+} from "./api/api.js";
 import { GameBoardTile } from "./components/GameBoardTile.js";
 import {
   diveCompletedMessage,
@@ -44,6 +48,7 @@ Devvit.addSchedulerJob({
     }
 
     gameNumber = (await context.redis.incrBy("game_number", 1)).toString();
+    await generateDailyGameboard(context.redis, gameNumber);
 
     const resp = await context.reddit.submitPost({
       title: `Daily Treasure Quest Game #${gameNumber}`,
@@ -55,6 +60,18 @@ Devvit.addSchedulerJob({
       ),
     });
     console.log("posted resp", JSON.stringify(resp));
+  },
+});
+
+Devvit.addMenuItem({
+  label: "Show Scheduled Jobs",
+  location: "subreddit",
+  forUserType: "moderator",
+  onPress: async (_event, context) => {
+    const { ui } = context;
+    const scheduledJobs = await context.scheduler.listJobs();
+    console.log("scheduledJobs", scheduledJobs);
+    ui.showToast({ text: "Check logs to see schedule jobs." });
   },
 });
 
@@ -109,7 +126,7 @@ Devvit.addMenuItem({
     console.log("Setting up schedule game...");
     try {
       const jobId = await context.scheduler.runJob({
-        cron: "0 12 * * *",
+        cron: "30 3 * * *",
         name: "daily_game",
       });
       await context.redis.set("dailyGameJobId", jobId);
@@ -123,14 +140,24 @@ Devvit.addMenuItem({
 });
 
 Devvit.addMenuItem({
-  label: "Start Diving",
+  label: "Start Test Dive",
   location: "subreddit",
   forUserType: "moderator",
   onPress: async (_event, context) => {
     const { reddit, ui } = context;
     const subreddit = await reddit.getCurrentSubreddit();
+
+    var gameNumber = await context.redis.get("game_number");
+
+    if (!gameNumber) {
+      console.log("No game number found, starting at 0");
+      await context.redis.set("game_number", "0");
+    }
+
+    await generateDailyGameboard(context.redis, "0");
+
     await reddit.submitPost({
-      title: "Treasure Quest",
+      title: `Treasure Quest Test Game #${gameNumber}`,
       subredditName: subreddit.name,
       preview: (
         <vstack height="100%" width="100%" alignment="middle center">
@@ -152,7 +179,7 @@ const App: Devvit.CustomPostComponent = (context) => {
   });
 
   const [gameBoard, setGameBoard] = useState<GameBoard>(async () => {
-    const gameBoard = await loadGameboard(
+    const gameBoard = await loadPlayerGameboard(
       context.redis,
       context.postId!,
       currentUserName!

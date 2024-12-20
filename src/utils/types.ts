@@ -21,6 +21,7 @@ export type GameBoard = {
   gameStarted: boolean;
   gameOver: boolean;
   gameOverMessage?: string;
+  gameNumber: string;
 };
 
 export enum TileType {
