@@ -94,21 +94,18 @@ Devvit.addMenuItem({
 });
 
 Devvit.addMenuItem({
-  label: "Cancel Daily Game",
+  label: "Cancel All Daily Games",
   location: "subreddit",
   forUserType: "moderator",
   onPress: async (_event, context) => {
     const { ui } = context;
     console.log("Canceling scheduled game...");
     try {
-      const jobId = await context.redis.get("dailyGameJobId");
-      if (!jobId) {
-        console.log("No job found to cancel");
-        return;
+      const scheduledJobs = await context.scheduler.listJobs();
+      for (const job of scheduledJobs) {
+        await context.scheduler.cancelJob(job.id);
+        console.log("Job cancelled:", job.id);
       }
-      await context.scheduler.cancelJob(jobId);
-      await context.redis.del("dailyGameJobId");
-      console.log("Job cancelled:", jobId);
     } catch (e) {
       console.log("error cancelling game schedule:", e);
       throw e;
