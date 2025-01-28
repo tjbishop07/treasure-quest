@@ -16,13 +16,6 @@ export const DiveProgress = (props: DiveProgressProps) => {
       backgroundColor="rgba(0, 0, 0, 0.75)"
     >
       <vstack alignment="center middle" width="80%" maxWidth="300px">
-        <image
-          url="diver.png"
-          imageWidth={250}
-          imageHeight={250}
-          description="game background"
-        />
-        <spacer size="medium" />
         <text
           wrap
           alignment="center"

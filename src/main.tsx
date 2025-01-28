@@ -244,7 +244,6 @@ const App: Devvit.CustomPostComponent = (context) => {
       } else {
         const treasureValue = selectedTile?.treasureValue || 0;
         setSystemMessage({
-          image: treasureValue > 0 ? "treasure-found.jpg" : undefined,
           title: "Dive Complete!",
           message: diveCompletedMessage(updateGameBoard, treasureValue),
           type: SystemMessageType.Info,
@@ -283,28 +282,10 @@ const App: Devvit.CustomPostComponent = (context) => {
     const foundCoins = [];
     const notFoundCoins = [];
     for (let i = 0; i < gameBoard.foundTreasureCount; i++) {
-      foundCoins.push(
-        <image
-          url="chest.png"
-          imageWidth="20px"
-          imageHeight="10px"
-          width="20px"
-          height="10px"
-          description="treasure chest"
-        />
-      );
+      foundCoins.push(<icon name="coins" color="yellow" size="xsmall" />);
     }
     for (let i = 0; i < notFoundTreasureCount; i++) {
-      notFoundCoins.push(
-        <image
-          url="chest-muted.png"
-          imageWidth="20px"
-          imageHeight="10px"
-          width="20px"
-          height="10px"
-          description="treasure chest muted"
-        />
-      );
+      notFoundCoins.push(<icon name="coins" color="white" size="xsmall" />);
     }
     return [...foundCoins, ...notFoundCoins];
   };
