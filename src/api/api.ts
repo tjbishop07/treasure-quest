@@ -3,8 +3,8 @@ import { GameBoard } from "../utils/types.js";
 import { generateBoard } from "../utils/board.js";
 
 const Keys = {
-  playerGameboard: (postId: string, username: string) =>
-    `playerGameboard:${postId}:${username}`,
+  playerGameboard: (gameNumber: string, username: string) =>
+    `playerGameboard:${gameNumber}:${username}`,
   dailyGameboard: (gameNumber: string) => `dailyGameboard:${gameNumber}}`,
 } as const;
 
@@ -17,7 +17,6 @@ export const generateDailyGameboard = async (
     Keys.dailyGameboard(gameNumber),
     JSON.stringify(newGameboard)
   );
-  console.log(`Daily gameboard generated, game #${gameNumber}`);
   return newGameboard;
 };
 
@@ -27,7 +26,6 @@ export const loadDailyGameboard = async (
 ): Promise<GameBoard> => {
   const storedGameboard = await redis.get(Keys.dailyGameboard(gameNumber));
   if (!storedGameboard) {
-    console.log("Daily gameboard not found");
     throw new Error("Daily gameboard not found");
   }
   return JSON.parse(storedGameboard);
@@ -35,11 +33,16 @@ export const loadDailyGameboard = async (
 
 export const loadPlayerGameboard = async (
   redis: RedisClient,
-  postId: string,
   currentUserName: string
 ): Promise<GameBoard> => {
+  const gameNumber = await redis.get("game_number");
+
+  if (!gameNumber) {
+    throw new Error("Game number not found");
+  }
+
   const storedGameboard = await redis.get(
-    Keys.playerGameboard(postId, currentUserName)
+    Keys.playerGameboard(gameNumber, currentUserName)
   );
 
   var gameboardParsed: GameBoard = JSON.parse(
@@ -47,40 +50,25 @@ export const loadPlayerGameboard = async (
   );
 
   if (!gameboardParsed || !gameboardParsed.rows) {
-    console.log(`Player gameboard not found for ${currentUserName}`);
-    const gameNumber = await redis.get("game_number");
-
-    if (!gameNumber) {
-      console.log("Game number not found when loading player gameboard");
-      throw new Error("Game number not found");
-    }
-
-    console.log(`Loading daily gameboard for game #${gameNumber}`);
     const dailyGameboard = loadDailyGameboard(redis, gameNumber);
-
     await redis.set(
-      Keys.playerGameboard(postId, currentUserName),
+      Keys.playerGameboard(gameNumber, currentUserName),
       JSON.stringify(dailyGameboard)
     );
 
     return dailyGameboard;
   }
 
-  console.log(
-    `Loaded player gameboard for ${currentUserName}`,
-    storedGameboard
-  );
   return gameboardParsed;
 };
 
 export const saveGameboard = async (
   redis: RedisClient,
-  postId: string,
   currentUserName: string,
   gameBoard: GameBoard
 ): Promise<void> => {
   redis.set(
-    Keys.playerGameboard(postId, currentUserName),
+    Keys.playerGameboard(gameBoard.gameNumber, currentUserName),
     JSON.stringify(gameBoard)
   );
 };

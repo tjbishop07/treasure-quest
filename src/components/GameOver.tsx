@@ -8,9 +8,12 @@ type GameOverProps = {
 
 export const GameOver = (props: GameOverProps) => {
   const _calculateFinalScore = () => {
+    const airSupplyBonus =
+      props.gameboard.airSupply > 0 ? props.gameboard.airSupply : 0;
+
     return (
       props.gameboard.foundTreasureValue +
-      props.gameboard.airSupply +
+      airSupplyBonus +
       _determineAllTreasureBonus()
     );
   };
@@ -44,7 +47,10 @@ export const GameOver = (props: GameOverProps) => {
         <spacer size="large" />
         <vstack>
           <text>Coins Found: {props.gameboard.foundTreasureValue}</text>
-          <text>Air Supply Bonus: {props.gameboard.airSupply}</text>
+          <text>
+            Air Supply Bonus:{" "}
+            {props.gameboard.airSupply > 0 ? props.gameboard.airSupply : 0}
+          </text>
           <text>All Treasure Bonus: {_determineAllTreasureBonus()}</text>
         </vstack>
         <spacer size="large" />

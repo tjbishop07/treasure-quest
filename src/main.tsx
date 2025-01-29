@@ -178,7 +178,6 @@ const App: Devvit.CustomPostComponent = (context) => {
   const [gameBoard, setGameBoard] = useState<GameBoard>(async () => {
     const gameBoard = await loadPlayerGameboard(
       context.redis,
-      context.postId!,
       currentUserName!
     );
     return gameBoard;
@@ -249,12 +248,7 @@ const App: Devvit.CustomPostComponent = (context) => {
       }
     }
 
-    await saveGameboard(
-      context.redis,
-      context.postId!,
-      currentUserName!,
-      updateGameBoard
-    );
+    await saveGameboard(context.redis, currentUserName!, updateGameBoard);
 
     setGameBoard(updateGameBoard);
   };
@@ -282,7 +276,9 @@ const App: Devvit.CustomPostComponent = (context) => {
       foundCoins.push(<icon name="coins" color="yellow" size="xsmall" />);
     }
     for (let i = 0; i < notFoundTreasureCount; i++) {
-      notFoundCoins.push(<icon name="coins" color="white" size="xsmall" />);
+      notFoundCoins.push(
+        <icon name="coins" color="rgba(255,255,255,.25)" size="xsmall" />
+      );
     }
     return [...foundCoins, ...notFoundCoins];
   };
