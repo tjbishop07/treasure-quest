@@ -59,7 +59,7 @@ Devvit.addSchedulerJob({
         </vstack>
       ),
     });
-    console.log("posted resp", JSON.stringify(resp));
+    console.log(`Create new post: ${context.postId}`);
   },
 });
 
@@ -178,7 +178,8 @@ const App: Devvit.CustomPostComponent = (context) => {
   const [gameBoard, setGameBoard] = useState<GameBoard>(async () => {
     const gameBoard = await loadPlayerGameboard(
       context.redis,
-      currentUserName!
+      currentUserName!,
+      context.postId ?? ""
     );
     return gameBoard;
   });
@@ -248,7 +249,12 @@ const App: Devvit.CustomPostComponent = (context) => {
       }
     }
 
-    await saveGameboard(context.redis, currentUserName!, updateGameBoard);
+    await saveGameboard(
+      context.redis,
+      currentUserName!,
+      context.postId ?? "",
+      updateGameBoard
+    );
 
     setGameBoard(updateGameBoard);
   };

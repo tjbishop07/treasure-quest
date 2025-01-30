@@ -28,7 +28,7 @@ export const GameOver = (props: GameOverProps) => {
       width="100%"
       height="100%"
       alignment="center middle"
-      backgroundColor="rgba(0, 0, 0, 0.95)"
+      backgroundColor="rgba(0, 0, 0, 0.75)"
     >
       <vstack alignment="center middle" width="80%" maxWidth="300px">
         <text

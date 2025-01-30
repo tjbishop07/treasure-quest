@@ -3,8 +3,8 @@ import { GameBoard } from "../utils/types.js";
 import { generateBoard } from "../utils/board.js";
 
 const Keys = {
-  playerGameboard: (gameNumber: string, username: string) =>
-    `playerGameboard:${gameNumber}:${username}`,
+  playerGameboard: (postId: string, username: string) =>
+    `playerGameboard:${postId}:${username}`,
   dailyGameboard: (gameNumber: string) => `dailyGameboard:${gameNumber}}`,
 } as const;
 
@@ -33,7 +33,8 @@ export const loadDailyGameboard = async (
 
 export const loadPlayerGameboard = async (
   redis: RedisClient,
-  currentUserName: string
+  currentUserName: string,
+  postId: string
 ): Promise<GameBoard> => {
   const gameNumber = await redis.get("game_number");
 
@@ -42,7 +43,7 @@ export const loadPlayerGameboard = async (
   }
 
   const storedGameboard = await redis.get(
-    Keys.playerGameboard(gameNumber, currentUserName)
+    Keys.playerGameboard(postId, currentUserName)
   );
 
   var gameboardParsed: GameBoard = JSON.parse(
@@ -52,7 +53,7 @@ export const loadPlayerGameboard = async (
   if (!gameboardParsed || !gameboardParsed.rows) {
     const dailyGameboard = loadDailyGameboard(redis, gameNumber);
     await redis.set(
-      Keys.playerGameboard(gameNumber, currentUserName),
+      Keys.playerGameboard(postId, currentUserName),
       JSON.stringify(dailyGameboard)
     );
 
@@ -65,10 +66,11 @@ export const loadPlayerGameboard = async (
 export const saveGameboard = async (
   redis: RedisClient,
   currentUserName: string,
+  postId: string,
   gameBoard: GameBoard
 ): Promise<void> => {
   redis.set(
-    Keys.playerGameboard(gameBoard.gameNumber, currentUserName),
+    Keys.playerGameboard(postId, currentUserName),
     JSON.stringify(gameBoard)
   );
 };
