@@ -35,7 +35,7 @@ export const GameOver = (props: GameOverProps) => {
           wrap
           alignment="center"
           weight="bold"
-          size="xlarge"
+          size="xxlarge"
           style="heading"
           color="white"
         >
@@ -54,7 +54,7 @@ export const GameOver = (props: GameOverProps) => {
           <text>All Treasure Bonus: {_determineAllTreasureBonus()}</text>
         </vstack>
         <spacer size="large" />
-        <text size="xlarge" weight="bold" color="yellow">
+        <text size="xxlarge" weight="bold" color="yellow">
           Final Score: {_calculateFinalScore()}
         </text>
       </vstack>

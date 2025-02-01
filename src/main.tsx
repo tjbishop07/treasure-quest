@@ -171,14 +171,14 @@ const App: Devvit.CustomPostComponent = (context) => {
     if (!context.userId) {
       return null;
     }
-    const user = await context.reddit.getCurrentUser();
-    return user?.username || "";
+    const user = await context.reddit.getCurrentUsername();
+    return user || null;
   });
 
   const [gameBoard, setGameBoard] = useState<GameBoard>(async () => {
     const gameBoard = await loadPlayerGameboard(
       context.redis,
-      currentUserName!,
+      currentUserName ?? "",
       context.postId ?? ""
     );
     return gameBoard;
@@ -251,7 +251,7 @@ const App: Devvit.CustomPostComponent = (context) => {
 
     await saveGameboard(
       context.redis,
-      currentUserName!,
+      currentUserName || "",
       context.postId ?? "",
       updateGameBoard
     );

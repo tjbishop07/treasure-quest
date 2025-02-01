@@ -7,10 +7,10 @@ settings:
 dependencies:
   '@devvit/kit':
     specifier: ^1.1.4
-    version: 1.1.4(@devvit/public-api@0.11.5)
+    version: 1.1.4(@devvit/public-api@0.11.6)
   '@devvit/public-api':
-    specifier: 0.11.5
-    version: 0.11.5
+    specifier: 0.11.6
+    version: 0.11.6
 
 devDependencies:
   typescript:
@@ -19,16 +19,16 @@ devDependencies:
 
 packages:
 
-  /@devvit/kit@1.1.4(@devvit/public-api@0.11.5):
+  /@devvit/kit@1.1.4(@devvit/public-api@0.11.6):
     resolution: {integrity: sha512-2GdoVyBnfCF65NaPjn26Qyz9ALuxJwwmppXBF6I0lGu4dxV0BenKEd6vyhtbLqV3H2l2lN56/A2h3Sdw24A3hw==}
     peerDependencies:
       '@devvit/public-api': '*'
     dependencies:
-      '@devvit/public-api': 0.11.5
+      '@devvit/public-api': 0.11.6
     dev: false
 
-  /@devvit/protos@0.11.5:
-    resolution: {integrity: sha512-Ip07ZVCnpg/Ex/3MhO0rbh2Z175BBb8rCVPNUE9BKNmhG3V9ABFn21XoEJVrPu+aV7eo7tcrP1g+BHcrSpaTAQ==}
+  /@devvit/protos@0.11.6:
+    resolution: {integrity: sha512-huMK/Jr5q4/WCAYU35eZ26vjJMd704MAGAMc5oo6XLtcYPs4DleAtqFNuYuqCgUhN4UhRzqWQ+OmtrOf+P02Mg==}
     peerDependencies:
       twirp-ts: ^2.5.0
     peerDependenciesMeta:
@@ -39,11 +39,11 @@ packages:
       rxjs: 7.8.1
     dev: false
 
-  /@devvit/public-api@0.11.5:
-    resolution: {integrity: sha512-OeSS7PJLFPgTYOIU6EYZUGErnsyr5uMFN9RJpRp/wYeiU2U1d7rShGAz7Kh24c4xXjjO2ENWUN7TOzoJnsx/Bw==}
+  /@devvit/public-api@0.11.6:
+    resolution: {integrity: sha512-eA1XTgVtlXKymYcDrCmynHbAIRwdFgZN2Wgt/UCG8WmY+qkZ7jkNRweGs+JCbZCEhdHKsooqr5Otca6tkH3H9Q==}
     dependencies:
-      '@devvit/protos': 0.11.5
-      '@devvit/shared-types': 0.11.5
+      '@devvit/protos': 0.11.6
+      '@devvit/shared-types': 0.11.6
       base64-js: 1.5.1
       clone-deep: 4.0.1
       core-js: 3.27.2
@@ -52,10 +52,10 @@ packages:
       - twirp-ts
     dev: false
 
-  /@devvit/shared-types@0.11.5:
-    resolution: {integrity: sha512-RviAeX/bJFHKJ2V3xH68qG6qMEKh2bnpzxrcW8gFp9W4QCEToVnVl5Rgd4NHEN2cX8gaxIOfXNS59lQQoo9bLQ==}
+  /@devvit/shared-types@0.11.6:
+    resolution: {integrity: sha512-U/uuTphMUDZODEGKx+xm5pUn2YGRXH8PQT6oN+xNICc96jjabhg0eRiPk0sFrao2JrZjpdGepTSDA1laVDEPlw==}
     dependencies:
-      '@devvit/protos': 0.11.5
+      '@devvit/protos': 0.11.6
       jsonschema: 1.4.1
       uuid: 9.0.0
     transitivePeerDependencies:

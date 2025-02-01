@@ -36,6 +36,9 @@ export const loadPlayerGameboard = async (
   currentUserName: string,
   postId: string
 ): Promise<GameBoard> => {
+  if (!currentUserName || currentUserName.length == 0)
+    throw new Error("User not found");
+
   const gameNumber = await redis.get("game_number");
 
   if (!gameNumber) {
@@ -69,6 +72,9 @@ export const saveGameboard = async (
   postId: string,
   gameBoard: GameBoard
 ): Promise<void> => {
+  if (!currentUserName || currentUserName.length == 0)
+    throw new Error("User not found");
+
   redis.set(
     Keys.playerGameboard(postId, currentUserName),
     JSON.stringify(gameBoard)
