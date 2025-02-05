@@ -32,7 +32,7 @@ export const Modal = (props: ModalProps) => {
               wrap
               alignment="center"
               weight="bold"
-              size="xlarge"
+              size="xxlarge"
               style="heading"
               color="white"
             >

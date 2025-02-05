@@ -41,6 +41,7 @@ export const GameOver = (props: GameOverProps) => {
         >
           GAME OVER
         </text>
+        <spacer size="medium" />
         <text wrap alignment="center" size="large" color="white">
           {props.gameboard.gameOverMessage}
         </text>

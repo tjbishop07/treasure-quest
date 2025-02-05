@@ -1,5 +1,5 @@
 export const startupMessage: string =
-  "Select a blue water tile to start exploring! Try to find all the hidden treasure before you air runs out!";
+  "Select a blue water tile to start exploring! Try to find all the hidden treasure before your air runs out!";
 
 export const diveErrorMessage: string =
   "Could not conduct dive. Please try again.";

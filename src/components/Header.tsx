@@ -9,7 +9,7 @@ type HeaderProps = {
 export const Header = (props: HeaderProps) => {
   return (
     <Columns columnCount={2} order="row">
-      <hstack alignment="middle start">
+      <hstack alignment="bottom start">
         <vstack alignment="middle start">
           <text style="heading" size="xlarge" weight="bold" outline="thin">
             {props.gameBoard.airSupply}m
@@ -19,7 +19,7 @@ export const Header = (props: HeaderProps) => {
           </text>
         </vstack>
       </hstack>
-      <hstack alignment="middle end">
+      <hstack alignment="bottom end">
         <vstack alignment="middle end">
           <text style="heading" size="xlarge" weight="bold" outline="thin">
             {props.gameBoard.foundTreasureValue}

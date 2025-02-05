@@ -47,7 +47,7 @@ export const diveCompletedMessage = (
 
 export const getTreasureCount = (gameBoard: GameBoard): number => {
   let treasureCount = 0;
-  gameBoard.rows.forEach((row) => {
+  gameBoard.rows.forEach((row: { tiles: any[] }) => {
     row.tiles.forEach((tile) => {
       if (tile.treasureValue > 0) {
         treasureCount++;
@@ -80,7 +80,7 @@ export const updateTileStatus = (
   coordinates: Coordinate,
   newStatus: TileStatus
 ): GameBoard => {
-  const updatedRows = gameBoard.rows.map((row) => {
+  const updatedRows = gameBoard.rows.map((row: { tiles: any[] }) => {
     const updatedTiles = row.tiles.map((tile) => {
       if (
         tile.coordinates.x === coordinates.x &&

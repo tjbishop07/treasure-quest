@@ -28,11 +28,8 @@ export const GameBoardTile = (props: TileProps) => {
   return (
     <hstack
       gap="medium"
-      grow
       cornerRadius="small"
-      borderColor={
-        props.selected ? "rgba(255, 255, 255, 1)" : "rgba(0, 0, 0, 1)"
-      }
+      borderColor={props.selected ? "rgba(255, 255, 255, 1)" : "#131f23"}
       alignment="middle center"
       border="thick"
       backgroundColor={_generateBackgroundColor(
@@ -42,6 +39,8 @@ export const GameBoardTile = (props: TileProps) => {
       )}
       padding="small"
       onPress={props.onPress}
+      width="33px"
+      height="33px"
     >
       {props.hasTreasure && props.status === TileStatus.Explored ? (
         <icon name="coins" color="yellow" size="xsmall" />
