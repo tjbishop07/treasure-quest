@@ -39,8 +39,8 @@ export const GameBoardTile = (props: TileProps) => {
       )}
       padding="small"
       onPress={props.onPress}
-      width="33px"
-      height="33px"
+      width="35px"
+      height="35px"
     >
       {props.hasTreasure && props.status === TileStatus.Explored ? (
         <icon name="coins" color="yellow" size="xsmall" />

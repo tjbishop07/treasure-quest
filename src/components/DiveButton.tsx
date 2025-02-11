@@ -72,7 +72,7 @@ export const DiveButton = (props: DiveButtonProps) => {
     updateGameBoard.gameStarted = true;
 
     if (updateGameBoard.airSupply <= 0) {
-      updateGameBoard.gameOverMessage = `OH NO! You ran out of air!`;
+      updateGameBoard.gameOverMessage = `You ran out of before finding all the treasure`;
       updateGameBoard.gameOver = true;
     } else {
       if (

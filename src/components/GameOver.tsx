@@ -1,6 +1,7 @@
 import { Devvit } from "@devvit/public-api";
 import { GameBoard } from "../utils/types.js";
 import { getTreasureCount } from "../utils/board.js";
+import { Columns } from "@devvit/kit";
 
 type GameOverProps = {
   gameboard: GameBoard;
@@ -28,7 +29,7 @@ export const GameOver = (props: GameOverProps) => {
       width="100%"
       height="100%"
       alignment="center middle"
-      backgroundColor="rgba(0, 0, 0, 0.75)"
+      backgroundColor="rgba(0, 0, 0, 0.80)"
     >
       <vstack alignment="center middle" width="80%" maxWidth="300px">
         <text
@@ -41,23 +42,39 @@ export const GameOver = (props: GameOverProps) => {
         >
           GAME OVER
         </text>
-        <spacer size="medium" />
-        <text wrap alignment="center" size="large" color="white">
+        <spacer size="small" />
+        <text wrap alignment="center" size="xlarge" color="white">
           {props.gameboard.gameOverMessage}
         </text>
         <spacer size="large" />
-        <vstack>
-          <text>Coins Found: {props.gameboard.foundTreasureValue}</text>
-          <text>
-            Air Supply Bonus:{" "}
+        <Columns columnCount={2} order="row" gapY="5px">
+          <text size="xlarge">Coins Found:</text>
+          <text size="xlarge" alignment="middle end">
+            {props.gameboard.foundTreasureValue}
+          </text>
+          <text size="xlarge">Air Supply Bonus: </text>
+          <text size="xlarge" alignment="middle end">
             {props.gameboard.airSupply > 0 ? props.gameboard.airSupply : 0}
           </text>
-          <text>All Treasure Bonus: {_determineAllTreasureBonus()}</text>
-        </vstack>
-        <spacer size="large" />
-        <text size="xxlarge" weight="bold" color="yellow">
-          Final Score: {_calculateFinalScore()}
-        </text>
+          <text size="xlarge">All Treasure Bonus:</text>
+          <text size="xlarge" alignment="middle end">
+            {_determineAllTreasureBonus()}
+          </text>
+          <spacer size="large" />
+          <spacer size="large" />
+
+          <text size="xxlarge" weight="bold" color="yellow">
+            Final Score:
+          </text>
+          <text
+            size="xxlarge"
+            weight="bold"
+            color="yellow"
+            alignment="middle end"
+          >
+            {_calculateFinalScore()}
+          </text>
+        </Columns>
       </vstack>
     </zstack>
   );

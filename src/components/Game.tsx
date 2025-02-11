@@ -68,10 +68,10 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
       {gameBoard && (
         <vstack alignment="center middle">
           <zstack
-            backgroundColor="rgba(19,31,35,1)"
-            padding="medium"
+            backgroundColor="rgba(19,31,35,.90)"
+            padding="small"
             height="100%"
-            alignment="top center"
+            alignment="middle center"
             cornerRadius="medium"
           >
             <vstack
@@ -124,13 +124,11 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
                   );
                 })}
 
-                <spacer size="medium" />
+                <spacer size="small" />
 
-                <hstack gap="small" alignment="center middle" grow>
-                  <TreasureBoxes gameBoard={gameBoard} />
-                </hstack>
+{/* 
 
-                <spacer size="medium" />
+                <spacer size="small" /> */}
 
                 <DiveButton
                   gameBoard={gameBoard}
@@ -145,7 +143,6 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
               </vstack>
             </vstack>
           </zstack>
-          <spacer size="small" />
         </vstack>
       )}
 

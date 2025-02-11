@@ -8,6 +8,20 @@ const Keys = {
   dailyGameboard: (gameNumber: string) => `dailyGameboard:${gameNumber}}`,
 } as const;
 
+export const updateGlobalLeaderboard = async (
+  redis: RedisClient,
+  finalScore: number,
+  currentUserName: string
+): Promise<void> => {
+  const leaderboardKey = `leaderboard:global`;
+  const currentScore = await redis.zScore(leaderboardKey, currentUserName);
+  const newScore = (currentScore ? Number(currentScore) : 0) + finalScore;
+  await redis.zAdd(leaderboardKey, {
+    member: currentUserName,
+    score: newScore,
+  });
+};
+
 export const generateDailyGameboard = async (
   redis: RedisClient,
   gameNumber: string
@@ -31,6 +45,7 @@ export const loadDailyGameboard = async (
   return JSON.parse(storedGameboard);
 };
 
+// TODO: Where do we call this?
 export const loadPlayerGameboard = async (
   redis: RedisClient,
   currentUserName: string,
