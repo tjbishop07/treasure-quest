@@ -12,15 +12,15 @@ import {
   getTreasureCount,
   updateTileStatus,
 } from "../utils/board.js";
-import { saveGameboard } from "../api/api.js";
+import { Service } from "../api/Service.js";
 import { diveErrorMessage } from "../utils/messages.js";
 
 type DiveButtonProps = {
   gameBoard: GameBoard;
   selectedTile: Tile | null;
-  context: Devvit.Context;
-  username: string;
-  postId: string;
+  service: Service;
+  username: string | null;
+  postId: string | null;
   updateGameBoard: (gameBoard: GameBoard) => void;
   updateSelectedTile: (tile: Tile | null) => void;
   sendSystemMessage: (message: SystemMessage) => void;
@@ -51,9 +51,10 @@ export const DiveButton = (props: DiveButtonProps) => {
   }, 100);
 
   const _analyzeDiveResults = async () => {
-    if (!props.selectedTile) return;
+    if (!props.selectedTile || !props.postId || !props.username)
+      throw new Error("Invalid game state when trying to analyze dive results");
 
-    const updateGameBoard = updateTileStatus(
+    const updatedGameBoard = updateTileStatus(
       props.gameBoard,
       props.selectedTile.coordinates,
       TileStatus.Explored
@@ -62,44 +63,40 @@ export const DiveButton = (props: DiveButtonProps) => {
     if (
       props.selectedTile.treasureValue &&
       props.selectedTile.treasureValue > 0 &&
-      updateGameBoard.airSupply > 0
+      updatedGameBoard.airSupply > 0
     ) {
-      updateGameBoard.foundTreasureCount++;
-      updateGameBoard.foundTreasureValue += props.selectedTile.treasureValue;
+      updatedGameBoard.foundTreasureCount++;
+      updatedGameBoard.foundTreasureValue += props.selectedTile.treasureValue;
     }
 
-    updateGameBoard.lastTileSelected = props.selectedTile;
-    updateGameBoard.gameStarted = true;
+    updatedGameBoard.lastTileSelected = props.selectedTile;
+    updatedGameBoard.gameStarted = true;
 
-    if (updateGameBoard.airSupply <= 0) {
-      updateGameBoard.gameOverMessage = `You ran out of before finding all the treasure`;
-      updateGameBoard.gameOver = true;
+    if (updatedGameBoard.airSupply <= 0) {
+      updatedGameBoard.gameOverMessage = `Oh no! You ran out of air!`;
+      updatedGameBoard.gameOver = true;
     } else {
       if (
-        updateGameBoard.foundTreasureCount === getTreasureCount(updateGameBoard)
+        updatedGameBoard.foundTreasureCount ===
+        getTreasureCount(updatedGameBoard)
       ) {
-        updateGameBoard.gameOverMessage = `You found all the treasure!`;
-        updateGameBoard.gameOver = true;
+        updatedGameBoard.gameOverMessage = `You found all the treasure!`;
+        updatedGameBoard.gameOver = true;
       } else {
         const treasureValue = props.selectedTile.treasureValue || 0;
         props.sendSystemMessage({
           title: "Dive Complete!",
-          message: diveCompletedMessage(updateGameBoard, treasureValue),
+          message: diveCompletedMessage(updatedGameBoard, treasureValue),
           type: SystemMessageType.Info,
           dismissable: true,
         });
       }
     }
 
-    await saveGameboard(
-      props.context.redis,
-      props.username,
-      props.postId,
-      updateGameBoard
-    );
-
-    props.updateGameBoard(updateGameBoard);
+    updatedGameBoard.lastMoveTimestamp = new Date().getTime();
+    props.updateGameBoard(updatedGameBoard);
     props.updateSelectedTile(null);
+    props.service.saveGameboard(props.username, props.postId, updatedGameBoard);
   };
 
   const _dive = async (): Promise<void> => {

@@ -33,13 +33,13 @@ export const Header = (props: HeaderProps) => {
       >
         <hstack
           backgroundColor={
-            oxygenRemaining > 50 ? "KiwiGreen-400" : "YellowOrange-400"
+            oxygenRemaining > 50 ? "LightBlue-400" : "YellowOrange-400"
           }
           width={`${oxygenRemaining}%`}
           height="20px"
         >
           <vstack height="100%" width="100%" alignment="middle center">
-            <text size="xsmall" weight="bold" color="rgba(255, 255, 255, 0.75)">
+            <text size="small" weight="bold" color="LightBlue-800">
               {oxygenRemaining > 20 ? "Oxygen:" : ""}{" "}
               {oxygenRemaining > 10 ? `${oxygenRemaining.toFixed(0)}%` : ""}
             </text>

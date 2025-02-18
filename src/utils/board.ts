@@ -80,16 +80,13 @@ export const updateTileStatus = (
   coordinates: Coordinate,
   newStatus: TileStatus
 ): GameBoard => {
-  const updatedRows = gameBoard.rows.map((row: { tiles: any[] }) => {
-    const updatedTiles = row.tiles.map((tile) => {
-      if (
-        tile.coordinates.x === coordinates.x &&
-        tile.coordinates.y === coordinates.y
-      ) {
-        return { ...tile, status: newStatus };
-      }
-      return tile;
-    });
+  const updatedRows = gameBoard.rows.map((row: { tiles: Tile[] }) => {
+    const updatedTiles = row.tiles.map((tile) =>
+      tile.coordinates.x === coordinates.x &&
+      tile.coordinates.y === coordinates.y
+        ? { ...tile, status: newStatus }
+        : tile
+    );
     return { ...row, tiles: updatedTiles };
   });
 

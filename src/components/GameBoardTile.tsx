@@ -2,6 +2,7 @@ import { Devvit } from "@devvit/public-api";
 import { TileType, TileStatus } from "../utils/types.js";
 
 type TileProps = {
+  key: string;
   selected: boolean;
   type: TileType;
   status: TileStatus;
@@ -27,6 +28,7 @@ const _generateBackgroundColor = (
 export const GameBoardTile = (props: TileProps) => {
   return (
     <hstack
+      key={props.key}
       gap="medium"
       cornerRadius="small"
       borderColor={props.selected ? "rgba(255, 255, 255, 1)" : "#131f23"}

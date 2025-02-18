@@ -1,11 +1,12 @@
 import { Devvit, type MenuItem } from "@devvit/public-api";
-import { generateDailyGameboard } from "../api/api.js";
+import { Service } from "../api/Service.js";
 
 export const startTestGame: MenuItem = {
   label: "Start Test Dive",
   location: "subreddit",
   forUserType: "moderator",
   onPress: async (_event, context) => {
+    const service = new Service(context);
     const { reddit, ui } = context;
     const subreddit = await reddit.getCurrentSubreddit();
 
@@ -16,7 +17,7 @@ export const startTestGame: MenuItem = {
       await context.redis.set("game_number", "0");
     }
 
-    await generateDailyGameboard(context.redis, "0");
+    await service.generateDailyGameboard("0");
 
     await reddit.submitPost({
       title: `Treasure Quest Test Game #${gameNumber}`,

@@ -22,6 +22,7 @@ export type GameBoard = {
   gameOver: boolean;
   gameOverMessage?: string;
   gameNumber: string;
+  lastMoveTimestamp?: number;
 };
 
 export enum TileType {

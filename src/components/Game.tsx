@@ -1,4 +1,4 @@
-import { Devvit, Context, useState, useInterval } from "@devvit/public-api";
+import { Devvit, Context, useState, useAsync } from "@devvit/public-api";
 import {
   GameBoard,
   Row,
@@ -8,9 +8,8 @@ import {
   TileStatus,
   TileType,
 } from "../utils/types.js";
-import { loadPlayerGameboard } from "../api/api.js";
+import { Service } from "../api/Service.js";
 import {
-  startupMessage,
   tileExploredMessage,
   tileSelectionErrorMessage,
 } from "../utils/messages.js";
@@ -19,39 +18,34 @@ import { GameBoardTile } from "./GameBoardTile.js";
 import { Modal } from "./Modal.js";
 import { DiveButton } from "./DiveButton.js";
 import { GameOver } from "./GameOver.js";
-import { TreasureBoxes } from "./TreasureBoxes.js";
+import { Welcome } from "./Welcome.js";
 
 export const Game: Devvit.CustomPostComponent = (context: Context) => {
-  const [currentUserName] = useState<string | null>(async () => {
-    if (!context.userId) {
-      return null;
-    }
-    const user = await context.reddit.getCurrentUsername();
-    return user || null;
+  const service = new Service(context);
+  const postId = context.postId ?? null;
+
+  const { data: username } = useAsync(async () => {
+    const user = await context.reddit.getCurrentUser();
+    return user?.username ?? null;
   });
 
-  const [gameBoard, setGameBoard] = useState<GameBoard>(async () => {
-    const gameBoard = await loadPlayerGameboard(
-      context.redis,
-      currentUserName ?? "",
-      context.postId ?? ""
-    );
-    return gameBoard;
+  const [gameBoard, setGameBoard] = useState<GameBoard | null>(async () => {
+    const user = await context.reddit.getCurrentUser();
+    if (!user?.username) return null;
+    return await service.loadPlayerGameboard(user.username, postId);
   });
 
   const [selectedTile, setSelectedTile] = useState<Tile | null>(null);
   const [systemMessage, setSystemMessage] = useState<SystemMessage | null>(
-    () => {
-      if (gameBoard.gameStarted) return null;
-      return {
-        title: "There's hidden treasure nearby!",
-        message: startupMessage,
-        type: SystemMessageType.Info,
-        dismissable: true,
-        buttonLabel: "Start Exploring!",
-      };
-    }
+    null
   );
+
+  const _startGame = async () => {
+    if (!gameBoard) return;
+    setGameBoard({ ...gameBoard, gameStarted: true });
+  };
+
+  if (!gameBoard) return <text>Loading...</text>;
 
   return (
     <zstack width="100%" height="100%" alignment="middle center">
@@ -65,7 +59,9 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
         description="game background"
       />
 
-      {gameBoard && (
+      {!gameBoard?.gameStarted ? (
+        <Welcome username={username} onDismiss={_startGame} />
+      ) : (
         <vstack alignment="center middle">
           <zstack
             backgroundColor="rgba(19,31,35,.90)"
@@ -83,62 +79,54 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
               <Header gameBoard={gameBoard} />
 
               <vstack>
-                {gameBoard.rows.map((row: Row) => {
-                  const tiles: Tile[] = row.tiles;
-                  return (
-                    <hstack>
-                      {tiles.map((tile: Tile) =>
-                        GameBoardTile({
-                          selected: selectedTile === tile,
-                          type: tile.type,
-                          status: tile.status,
-                          hasTreasure: tile.treasureValue > 0,
-                          depth: tile.depth,
-                          onPress: async () => {
-                            if (tile.type === TileType.Land) {
-                              setSystemMessage({
-                                message: tileSelectionErrorMessage,
-                                type: SystemMessageType.Error,
-                                dismissable: true,
-                              });
-                              setSelectedTile(null);
-                              return;
-                            }
-                            if (tile.status === TileStatus.Explored) {
-                              setSystemMessage({
-                                message: tileExploredMessage(
-                                  tile.treasureValue
-                                ),
-                                type: SystemMessageType.Error,
-                                dismissable: true,
-                              });
-                              setSelectedTile(null);
-                              return;
-                            }
-                            setSystemMessage(null);
-                            setSelectedTile(tile);
-                          },
-                        })
-                      )}
-                    </hstack>
-                  );
-                })}
+                {gameBoard.rows.map((row: Row, index: number) => (
+                  <hstack key={index.toString()}>
+                    {row.tiles.map((tile: Tile, tileIndex: number) => (
+                      <GameBoardTile
+                        key={`${index}-${tileIndex}`}
+                        selected={selectedTile === tile}
+                        type={tile.type}
+                        status={tile.status}
+                        hasTreasure={tile.treasureValue > 0}
+                        depth={tile.depth}
+                        onPress={async () => {
+                          if (tile.type === TileType.Land) {
+                            setSystemMessage({
+                              message: tileSelectionErrorMessage,
+                              type: SystemMessageType.Error,
+                              dismissable: true,
+                            });
+                            setSelectedTile(null);
+                            return;
+                          }
+                          if (tile.status === TileStatus.Explored) {
+                            setSystemMessage({
+                              message: tileExploredMessage(tile.treasureValue),
+                              type: SystemMessageType.Error,
+                              dismissable: true,
+                            });
+                            setSelectedTile(null);
+                            return;
+                          }
+                          setSystemMessage(null);
+                          setSelectedTile(tile);
+                        }}
+                      />
+                    ))}
+                  </hstack>
+                ))}
 
                 <spacer size="small" />
-
-{/* 
-
-                <spacer size="small" /> */}
 
                 <DiveButton
                   gameBoard={gameBoard}
                   selectedTile={selectedTile}
-                  context={context}
+                  service={service}
                   updateGameBoard={setGameBoard}
                   updateSelectedTile={setSelectedTile}
                   sendSystemMessage={setSystemMessage}
-                  username={currentUserName ?? ""}
-                  postId={context.postId ?? ""}
+                  username={username}
+                  postId={postId}
                 />
               </vstack>
             </vstack>
@@ -149,10 +137,9 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
       {systemMessage &&
         Modal({
           systemMessage: systemMessage,
-          onPress: () => setSystemMessage(null),
+          onDismiss: () => setSystemMessage(null),
         })}
-
-      {gameBoard.gameOver && <GameOver gameboard={gameBoard} />}
+      {gameBoard?.gameOver && <GameOver gameboard={gameBoard} />}
     </zstack>
   );
 };

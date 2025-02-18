@@ -3,7 +3,7 @@ import { SystemMessage, SystemMessageType } from "../utils/types.js";
 
 type ModalProps = {
   systemMessage: SystemMessage;
-  onPress: () => void | Promise<void>;
+  onDismiss: () => void | Promise<void>;
 };
 
 export const Modal = (props: ModalProps) => {
@@ -56,7 +56,11 @@ export const Modal = (props: ModalProps) => {
         {props.systemMessage.dismissable && (
           <>
             <spacer size="large" />
-            <button appearance="primary" onPress={props.onPress}>
+            <button
+              width="100%"
+              appearance="secondary"
+              onPress={props.onDismiss}
+            >
               {props.systemMessage.buttonLabel ?? "Close"}
             </button>
           </>

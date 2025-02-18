@@ -1,10 +1,12 @@
 import type { ScheduledCronJob, ScheduledJobType } from "@devvit/public-api";
 import { Devvit } from "@devvit/public-api";
-import { generateDailyGameboard } from "../api/api.js";
+import { Service } from "../api/Service.js";
 
 export const scheduleGame: ScheduledJobType<ScheduledCronJob> = {
   name: "daily_game",
   onRun: async (_, context) => {
+    const service = new Service(context);
+
     const subreddit = await context.reddit.getCurrentSubreddit();
     var gameNumber = await context.redis.get("game_number");
 
@@ -14,7 +16,7 @@ export const scheduleGame: ScheduledJobType<ScheduledCronJob> = {
     }
 
     gameNumber = (await context.redis.incrBy("game_number", 1)).toString();
-    await generateDailyGameboard(context.redis, gameNumber);
+    await service.generateDailyGameboard(gameNumber);
 
     const resp = await context.reddit.submitPost({
       title: `Daily Treasure Quest Game #${gameNumber}`,
