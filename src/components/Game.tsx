@@ -21,7 +21,7 @@ import { GameOver } from "./GameOver.js";
 import { Welcome } from "./Welcome.js";
 
 export const Game: Devvit.CustomPostComponent = (context: Context) => {
-  const service = new Service(context);
+  const service = new Service(context.redis);
   const postId = context.postId ?? null;
 
   const { data: username } = useAsync(async () => {
@@ -40,9 +40,34 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
     null
   );
 
-  const _startGame = async () => {
+  const handleStartGame = async () => {
     if (!gameBoard) return;
     setGameBoard({ ...gameBoard, gameStarted: true });
+  };
+
+  const handleTileSelection = async (tile: Tile) => {
+    if (tile.type === TileType.Land) {
+      setSystemMessage({
+        message: tileSelectionErrorMessage,
+        type: SystemMessageType.Error,
+        dismissable: true,
+      });
+      setSelectedTile(null);
+      return;
+    }
+
+    if (tile.status === TileStatus.Explored) {
+      setSystemMessage({
+        message: tileExploredMessage(tile.treasureValue),
+        type: SystemMessageType.Error,
+        dismissable: true,
+      });
+      setSelectedTile(null);
+      return;
+    }
+
+    setSystemMessage(null);
+    setSelectedTile(tile);
   };
 
   if (!gameBoard) return <text>Loading...</text>;
@@ -60,7 +85,7 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
       />
 
       {!gameBoard?.gameStarted ? (
-        <Welcome username={username} onDismiss={_startGame} />
+        <Welcome username={username} onDismiss={handleStartGame} />
       ) : (
         <vstack alignment="center middle">
           <zstack
@@ -79,38 +104,17 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
               <Header gameBoard={gameBoard} />
 
               <vstack>
-                {gameBoard.rows.map((row: Row, index: number) => (
-                  <hstack key={index.toString()}>
+                {gameBoard.rows.map((row: Row, rowIndex: number) => (
+                  <hstack key={rowIndex.toString()}>
                     {row.tiles.map((tile: Tile, tileIndex: number) => (
                       <GameBoardTile
-                        key={`${index}-${tileIndex}`}
+                        key={`${rowIndex}-${tileIndex}`}
                         selected={selectedTile === tile}
                         type={tile.type}
                         status={tile.status}
                         hasTreasure={tile.treasureValue > 0}
                         depth={tile.depth}
-                        onPress={async () => {
-                          if (tile.type === TileType.Land) {
-                            setSystemMessage({
-                              message: tileSelectionErrorMessage,
-                              type: SystemMessageType.Error,
-                              dismissable: true,
-                            });
-                            setSelectedTile(null);
-                            return;
-                          }
-                          if (tile.status === TileStatus.Explored) {
-                            setSystemMessage({
-                              message: tileExploredMessage(tile.treasureValue),
-                              type: SystemMessageType.Error,
-                              dismissable: true,
-                            });
-                            setSelectedTile(null);
-                            return;
-                          }
-                          setSystemMessage(null);
-                          setSelectedTile(tile);
-                        }}
+                        onPress={() => handleTileSelection(tile)}
                       />
                     ))}
                   </hstack>
@@ -134,11 +138,12 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
         </vstack>
       )}
 
-      {systemMessage &&
-        Modal({
-          systemMessage: systemMessage,
-          onDismiss: () => setSystemMessage(null),
-        })}
+      {systemMessage && (
+        <Modal
+          systemMessage={systemMessage}
+          onDismiss={() => setSystemMessage(null)}
+        />
+      )}
       {gameBoard?.gameOver && <GameOver gameboard={gameBoard} />}
     </zstack>
   );

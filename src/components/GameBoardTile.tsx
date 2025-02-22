@@ -1,7 +1,7 @@
 import { Devvit } from "@devvit/public-api";
 import { TileType, TileStatus } from "../utils/types.js";
 
-type TileProps = {
+interface TileProps {
   key: string;
   selected: boolean;
   type: TileType;
@@ -9,46 +9,61 @@ type TileProps = {
   hasTreasure: boolean;
   depth: number;
   onPress: () => void | Promise<void>;
-};
+}
 
-const _generateBackgroundColor = (
+const COLORS = {
+  explored: "green",
+  land: "#5C4033", // brown
+  border: {
+    selected: "rgba(255, 255, 255, 1)",
+    default: "#131f23",
+  },
+} as const;
+
+const getBackgroundColor = (
   type: TileType,
   depth: number,
   status: TileStatus
-) => {
+): string => {
   if (status === TileStatus.Explored) {
-    return "green";
+    return COLORS.explored;
   }
   if (type === TileType.Land) {
-    return "#5C4033"; // brown
+    return COLORS.land;
   }
   return `rgba(4, 122, 197, .${100 - depth})`; // Blue depending on depth
 };
 
-export const GameBoardTile = (props: TileProps) => {
+export const GameBoardTile = ({
+  key,
+  selected,
+  type,
+  status,
+  hasTreasure,
+  depth,
+  onPress,
+}: TileProps) => {
+  const showTreasure = hasTreasure && status === TileStatus.Explored;
+
   return (
     <hstack
-      key={props.key}
+      key={key}
       gap="medium"
       cornerRadius="small"
-      borderColor={props.selected ? "rgba(255, 255, 255, 1)" : "#131f23"}
+      borderColor={selected ? COLORS.border.selected : COLORS.border.default}
       alignment="middle center"
       border="thick"
-      backgroundColor={_generateBackgroundColor(
-        props.type,
-        props.depth,
-        props.status
-      )}
+      backgroundColor={getBackgroundColor(type, depth, status)}
       padding="small"
-      onPress={props.onPress}
+      onPress={onPress}
       width="35px"
       height="35px"
     >
-      {props.hasTreasure && props.status === TileStatus.Explored ? (
-        <icon name="coins" color="yellow" size="xsmall" />
-      ) : (
-        <icon name="coins" color="transparent" size="xsmall" />
-      )}
+      <icon
+        name="coins"
+        color={showTreasure ? "yellow" : "transparent"}
+        size="xsmall"
+      />
     </hstack>
   );
 };

@@ -2,47 +2,44 @@ import type { RedisClient } from "@devvit/public-api";
 import { GameBoard } from "../utils/types.js";
 import { generateBoard } from "../utils/board.js";
 
-const Keys = {
+const REDIS_KEYS = {
   playerGameboard: (postId: string, username: string) =>
     `playerGameboard:${postId}:${username}`,
-  dailyGameboard: (gameNumber: string) => `dailyGameboard:${gameNumber}}`,
+  dailyGameboard: (gameNumber: string) => `dailyGameboard:${gameNumber}`,
+  globalLeaderboard: "leaderboard:global",
+  gameNumber: "game_number",
 } as const;
 
 export class Service {
-  readonly redis: RedisClient;
-
-  constructor(context: { redis: RedisClient }) {
-    this.redis = context.redis;
-  }
+  constructor(private readonly redis: RedisClient) {}
 
   async updateGlobalLeaderboard(
-    finalScore: number,
-    currentUserName: string
+    score: number,
+    username: string
   ): Promise<void> {
-    const leaderboardKey = `leaderboard:global`;
     const currentScore = await this.redis.zScore(
-      leaderboardKey,
-      currentUserName
+      REDIS_KEYS.globalLeaderboard,
+      username
     );
-    const newScore = (currentScore ? Number(currentScore) : 0) + finalScore;
-    await this.redis.zAdd(leaderboardKey, {
-      member: currentUserName,
+    const newScore = (currentScore ? Number(currentScore) : 0) + score;
+    await this.redis.zAdd(REDIS_KEYS.globalLeaderboard, {
+      member: username,
       score: newScore,
     });
   }
 
   async generateDailyGameboard(gameNumber: string): Promise<GameBoard> {
-    const newGameboard = generateBoard(gameNumber);
+    const gameBoard = generateBoard(gameNumber);
     await this.redis.set(
-      Keys.dailyGameboard(gameNumber),
-      JSON.stringify(newGameboard)
+      REDIS_KEYS.dailyGameboard(gameNumber),
+      JSON.stringify(gameBoard)
     );
-    return newGameboard;
+    return gameBoard;
   }
 
   async loadDailyGameboard(gameNumber: string): Promise<GameBoard> {
     const storedGameboard = await this.redis.get(
-      Keys.dailyGameboard(gameNumber)
+      REDIS_KEYS.dailyGameboard(gameNumber)
     );
     if (!storedGameboard) {
       throw new Error("Daily gameboard not found");
@@ -51,49 +48,48 @@ export class Service {
   }
 
   async loadPlayerGameboard(
-    currentUserName: string | null,
+    username: string | null,
     postId: string | null
   ): Promise<GameBoard> {
-    if (!currentUserName || !postId)
-      throw new Error("Could not load player gameboard");
+    if (!username || !postId) {
+      throw new Error(
+        "Could not load player gameboard - missing username or postId"
+      );
+    }
 
-    const gameNumber = await this.redis.get("game_number");
-
+    const gameNumber = await this.redis.get(REDIS_KEYS.gameNumber);
     if (!gameNumber) {
       throw new Error("Game number not found");
     }
 
     const storedGameboard = await this.redis.get(
-      Keys.playerGameboard(postId, currentUserName)
+      REDIS_KEYS.playerGameboard(postId, username)
     );
 
-    var gameboardParsed: GameBoard = JSON.parse(
-      storedGameboard?.toString() || "{}"
-    );
+    const parsedGameboard: GameBoard = storedGameboard
+      ? JSON.parse(storedGameboard)
+      : null;
 
-    if (!gameboardParsed || !gameboardParsed.rows) {
+    if (!parsedGameboard?.rows) {
       const dailyGameboard = await this.loadDailyGameboard(gameNumber);
-      await this.redis.set(
-        Keys.playerGameboard(postId, currentUserName),
-        JSON.stringify(dailyGameboard)
-      );
-
+      await this.saveGameboard(username, postId, dailyGameboard);
       return dailyGameboard;
     }
 
-    return gameboardParsed;
+    return parsedGameboard;
   }
 
   async saveGameboard(
-    currentUserName: string,
+    username: string,
     postId: string,
     gameBoard: GameBoard
   ): Promise<void> {
-    if (!currentUserName || currentUserName.length == 0)
-      throw new Error("User not found");
+    if (!username) {
+      throw new Error("Cannot save gameboard - username not provided");
+    }
 
     await this.redis.set(
-      Keys.playerGameboard(postId, currentUserName),
+      REDIS_KEYS.playerGameboard(postId, username),
       JSON.stringify(gameBoard)
     );
   }
