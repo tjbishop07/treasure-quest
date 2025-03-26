@@ -19,9 +19,10 @@ import { Modal } from "./Modal.js";
 import { DiveButton } from "./DiveButton.js";
 import { GameOver } from "./GameOver.js";
 import { Welcome } from "./Welcome.js";
+import { DiveCompleted } from "./DiveCompleted.js";
 
 export const Game: Devvit.CustomPostComponent = (context: Context) => {
-  const service = new Service(context.redis);
+  const service = new Service(context);
   const postId = context.postId ?? null;
 
   const { data: username } = useAsync(async () => {
@@ -39,6 +40,8 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
   const [systemMessage, setSystemMessage] = useState<SystemMessage | null>(
     null
   );
+
+  const [diveCompleted, setDiveCompleted] = useState<boolean>(false);
 
   const handleStartGame = async () => {
     if (!gameBoard) return;
@@ -84,7 +87,7 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
         description="game background"
       />
 
-      {!gameBoard?.gameStarted ? (
+      {!gameBoard?.gameStarted && !diveCompleted ? (
         <Welcome username={username} onDismiss={handleStartGame} />
       ) : (
         <vstack alignment="center middle">
@@ -129,6 +132,7 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
                   updateGameBoard={setGameBoard}
                   updateSelectedTile={setSelectedTile}
                   sendSystemMessage={setSystemMessage}
+                  diveCompleted={() => setDiveCompleted(true)}
                   username={username}
                   postId={postId}
                 />
@@ -144,7 +148,22 @@ export const Game: Devvit.CustomPostComponent = (context: Context) => {
           onDismiss={() => setSystemMessage(null)}
         />
       )}
-      {gameBoard?.gameOver && <GameOver gameboard={gameBoard} />}
+
+      {diveCompleted && !gameBoard?.gameOver && (
+        <DiveCompleted
+          gameboard={gameBoard}
+          resetDiveCompleted={() => setDiveCompleted(false)}
+        />
+      )}
+
+      {gameBoard?.gameOver && (
+        <GameOver
+          gameboard={gameBoard}
+          service={service}
+          postId={postId ?? ""}
+          username={username ?? ""}
+        />
+      )}
     </zstack>
   );
 };

@@ -25,6 +25,11 @@ export type GameBoard = {
   lastMoveTimestamp?: number;
 };
 
+export type LeaderboardItem = {
+  member: string;
+  score: number;
+};
+
 export enum TileType {
   Land,
   Sea,

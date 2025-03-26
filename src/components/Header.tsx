@@ -40,7 +40,7 @@ export const Header = (props: HeaderProps) => {
         >
           <vstack height="100%" width="100%" alignment="middle center">
             <text size="small" weight="bold" color="LightBlue-800">
-              {oxygenRemaining > 20 ? "Oxygen:" : ""}{" "}
+              {oxygenRemaining > 30 ? "Oxygen:" : ""}{" "}
               {oxygenRemaining > 10 ? `${oxygenRemaining.toFixed(0)}%` : ""}
             </text>
           </vstack>

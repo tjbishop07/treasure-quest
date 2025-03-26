@@ -7,11 +7,7 @@ import {
   TileStatus,
   TileType,
 } from "../utils/types.js";
-import {
-  diveCompletedMessage,
-  getTreasureCount,
-  updateTileStatus,
-} from "../utils/board.js";
+import { getTreasureCount, updateTileStatus } from "../utils/board.js";
 import { Service } from "../api/Service.js";
 import { diveErrorMessage } from "../utils/messages.js";
 
@@ -24,6 +20,7 @@ type DiveButtonProps = {
   updateGameBoard: (gameBoard: GameBoard) => void;
   updateSelectedTile: (tile: Tile | null) => void;
   sendSystemMessage: (message: SystemMessage) => void;
+  diveCompleted: () => void;
 };
 
 export const DiveButton = ({
@@ -35,6 +32,7 @@ export const DiveButton = ({
   updateGameBoard,
   updateSelectedTile,
   sendSystemMessage,
+  diveCompleted,
 }: DiveButtonProps) => {
   const [diveProgress, setDiveProgress] = useState<number>(0);
   const [isDiving, setIsDiving] = useState<boolean>(false);
@@ -68,21 +66,31 @@ export const DiveButton = ({
     ) {
       updatedGameBoard.gameOverMessage = `You found all the treasure!`;
       updatedGameBoard.gameOver = true;
-    } else {
-      sendSystemMessage({
-        title: "Dive Complete!",
-        message: diveCompletedMessage(
-          updatedGameBoard,
-          selectedTile.treasureValue || 0
-        ),
-        type: SystemMessageType.Info,
-        dismissable: true,
-      });
+    }
+
+    if (updatedGameBoard.gameOver) {
+      const airSupplyBonus =
+        updatedGameBoard.airSupply > 0 ? updatedGameBoard.airSupply : 0;
+
+      const treasureBonus =
+        updatedGameBoard.foundTreasureCount ===
+        getTreasureCount(updatedGameBoard)
+          ? 100
+          : 0;
+
+      const finalScore =
+        updatedGameBoard.foundTreasureValue + airSupplyBonus + treasureBonus;
+
+      service.updateDailyLeaderboard(
+        username,
+        finalScore,
+        updatedGameBoard.gameNumber
+      );
     }
 
     updateGameBoard(updatedGameBoard);
-    updateSelectedTile(null);
     service.saveGameboard(username, postId, updatedGameBoard);
+    diveCompleted();
   };
 
   const diveInterval = useInterval(async () => {
@@ -101,7 +109,7 @@ export const DiveButton = ({
 
       return prev + 1;
     });
-  }, 100);
+  }, 1);
 
   const handleDive = async () => {
     if (!selectedTile) {

@@ -1,3 +1,8 @@
+/**
+ * Board utilities for the Treasure Quest game
+ * Handles board generation, tile updates, and game messages
+ */
+
 import {
   Tile,
   TileType,
@@ -7,6 +12,7 @@ import {
   TileStatus,
 } from "./types.js";
 
+// Game configuration constants
 const BOARD_SIZE = 10;
 const INITIAL_AIR_SUPPLY = 1500;
 const LAND_PROBABILITY = 0.25; // 1/4 chance
@@ -16,14 +22,24 @@ const MAX_DEPTH = 100;
 const MIN_TREASURE = 10;
 const MAX_TREASURE = 100;
 
+/**
+ * Returns a random integer between min and max (inclusive)
+ */
 const getRandomNumberInRange = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+/**
+ * Generates a random treasure value between MIN_TREASURE and MAX_TREASURE
+ */
 const _randomTreasureValue = (): number => {
   return getRandomNumberInRange(MIN_TREASURE, MAX_TREASURE);
 };
 
+/**
+ * Generates a single tile with random properties based on game rules
+ * @param coordinates - The x,y position of the tile on the board
+ */
 const _generateTile = (coordinates: Coordinate): Tile => {
   const tileType =
     Math.random() < LAND_PROBABILITY ? TileType.Land : TileType.Sea;
@@ -44,12 +60,20 @@ const _generateTile = (coordinates: Coordinate): Tile => {
   };
 };
 
+/**
+ * Generates a row of tiles for the game board
+ * @param rowNumber - The index of the row being generated
+ */
 const _generateRow = (rowNumber: number): Row => ({
   tiles: Array.from({ length: BOARD_SIZE }, (_, i) =>
     _generateTile({ x: rowNumber, y: i })
   ),
 });
 
+/**
+ * Generates a new game board with the given game number
+ * @param gameNumber - Unique identifier for this game instance
+ */
 export const generateBoard = (gameNumber: string): GameBoard => ({
   rows: Array.from({ length: BOARD_SIZE }, (_, i) => _generateRow(i)),
   lastTileSelected: null,
@@ -61,6 +85,12 @@ export const generateBoard = (gameNumber: string): GameBoard => ({
   gameNumber,
 });
 
+/**
+ * Updates the status of a specific tile on the game board
+ * @param gameBoard - Current game board state
+ * @param coordinates - Position of tile to update
+ * @param newStatus - New status to apply to the tile
+ */
 export const updateTileStatus = (
   gameBoard: GameBoard,
   coordinates: Coordinate,
@@ -81,6 +111,10 @@ export const updateTileStatus = (
   ),
 });
 
+/**
+ * Counts total number of treasure tiles on the board
+ * @param gameBoard - Current game board state
+ */
 export const getTreasureCount = (gameBoard: GameBoard): number =>
   gameBoard.rows.reduce(
     (count, row) =>
@@ -92,13 +126,19 @@ export const getTreasureCount = (gameBoard: GameBoard): number =>
     0
   );
 
-const getTreasureHint = (
+/**
+ * Generates a hint message based on treasure discovery and nearby treasures
+ * @param lastTile - The most recently explored tile
+ * @param currentRow - The row containing the last explored tile
+ * @param treasureValue - Value of treasure found, if any
+ */
+export const getTreasureHint = (
   lastTile: Tile,
   currentRow: Row,
   treasureValue: number
 ): string => {
   if (treasureValue > 0) {
-    return `Sweet! You found treasure with ${treasureValue} coins.`;
+    return `Sweet! You found treasure!`;
   }
 
   const unexploredTileWithTreasure = currentRow.tiles.find(
@@ -121,18 +161,4 @@ const getTreasureHint = (
   }
 
   return hint;
-};
-
-export const diveCompletedMessage = (
-  gameBoard: GameBoard,
-  treasureValue: number
-): string => {
-  if (!gameBoard.lastTileSelected) {
-    return "Last tile not selected";
-  }
-
-  const lastTile = gameBoard.lastTileSelected;
-  const currentRow = gameBoard.rows[lastTile.coordinates.x];
-
-  return getTreasureHint(lastTile, currentRow, treasureValue);
 };
